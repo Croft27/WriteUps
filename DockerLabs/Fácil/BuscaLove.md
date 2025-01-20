@@ -3,7 +3,8 @@
 ____
 Una vez desplegada comprobamos que tenemos conectividad con ```ping -c1 172.18.0.2```
  
-![[Pasted image 20250115125510.png]]
+![Pasted image 20250115125510](https://github.com/user-attachments/assets/b74ae2d7-311f-4b55-9a43-21afba33229a)
+
 
 ``-c1`` > solo repite el ping 1 sola vez.
 
