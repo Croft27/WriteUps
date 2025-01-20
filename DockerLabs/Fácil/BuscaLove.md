@@ -14,11 +14,13 @@ Una vez tenemos conectividad con la maquina Víctima, realizo un reconocimiento 
 nmap -p- --open -sS -sV -sC -min-rate 5000 -n -Pn 172.18.0.2 -oN Puertos
 ```
 
-![[Pasted image 20250115125915.png]]
+![Pasted image 20250115125915](https://github.com/user-attachments/assets/3bdbf7d7-72a6-4eac-9dcf-dc63f8d2ee19)
+
 
 Para ver los resultados de una forma mas vistosa realizo un ``cat Puertos -l ruby.rail``
 
-![[Pasted image 20250115130025.png]]
+![Pasted image 20250115130025](https://github.com/user-attachments/assets/9ad22776-3b9c-43a9-b286-3b75a7397415)
+
 
 Como se muestra en el resultado obtenemos los puertos 22 y 80 como puertos abiertos y con sus versiones.
 
@@ -27,12 +29,14 @@ Como se muestra en el resultado obtenemos los puertos 22 y 80 como puertos abier
 
 Accederemos al servidor web indicando la dirección IP en el buscador del navegador.
 
-![[Pasted image 20250117124516.png]]
+![Pasted image 20250117124516](https://github.com/user-attachments/assets/a192f7bc-bac6-4cbf-a566-c96f8a3544d1)
+
 
 Obtenemos una página por defecto de Apache2.
 Revisamos el código fuente de la pagina por si vemos algo fuera de lo normal. Para ello pulsamos ``Crtl + u`` 
 
-![[Pasted image 20250117124713.png]]
+![Pasted image 20250117124713](https://github.com/user-attachments/assets/d260d74d-a30b-4573-a0d1-d36383fb5db6)
+
 
 Revisando todo el código no veo nada relevante.
 
@@ -44,7 +48,8 @@ Vista la pagina Web y su código fuente sin obtener ningún resultado llamativo,
 gobuster dir -u 172.18.0.2 -w /usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -x html,php,txt -t 200
 ```
 
-![[Pasted image 20250117130613.png]]
+![Pasted image 20250117130341](https://github.com/user-attachments/assets/2d59ab94-db9b-4971-8c02-855fe500c7b0)
+
 <details>
 	<summary><strong>Explicación Comando:</strong></summary>
 	 gobuster dir > Modo de enumeración de directorios en un servidor web.
@@ -69,7 +74,8 @@ gobuster dir -u 172.18.0.2/wordpress -w /usr/share/seclists/Discovery/Web-Conten
 	-t 200 > numero de hilos para hacer el escaneo mas rápido. OJO: cuantos mas hilos se pongan mas se puede sobrecargar el servidor objetivo.
 </details>
 
-![[Pasted image 20250120120657.png]]
+![Pasted image 20250117130516](https://github.com/user-attachments/assets/e641cf4a-b429-4255-8d64-823eb7c714d2)
+
 
 Como resultado, obtenemos un nuevo directorio dentro del directorio wordpress, con nombre index.php.
 
