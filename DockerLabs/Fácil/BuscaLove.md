@@ -74,19 +74,20 @@ gobuster dir -u 172.18.0.2/wordpress -w /usr/share/seclists/Discovery/Web-Conten
 	-t 200 > numero de hilos para hacer el escaneo mas rápido. OJO: cuantos mas hilos se pongan mas se puede sobrecargar el servidor objetivo.
 </details>
 
-![Pasted image 20250117130516](https://github.com/user-attachments/assets/e641cf4a-b429-4255-8d64-823eb7c714d2)
+![Pasted image 20250120120657](https://github.com/user-attachments/assets/32eec660-f548-4218-9917-1c10c255b42e)
 
 
 Como resultado, obtenemos un nuevo directorio dentro del directorio wordpress, con nombre index.php.
 
 Examinamos el sitio web con estos directorios que hemos enumerado:
 
-![[Pasted image 20250120121015.png]]
+![Pasted image 20250120121015](https://github.com/user-attachments/assets/b6a4ad43-d3c8-4d0e-81d8-fcda770cdf1b)
+
 
 En dicha pagina web no hay nada relevante e incluso los enlaces no llevan a ningún sitio.
 Procedemos a examinar el código fuente de la web ``Ctrl + u``: 
 
-![[Pasted image 20250120121124.png]]
+![Pasted image 20250120121124](https://github.com/user-attachments/assets/c4671770-59a0-4a48-99f6-dfd48547c3d0)
 
 En su código fuente solo obtenemos un texto comentado, el cual se resalta en verde.
 Como no hemos conseguido nada, simplemente un texto comentado, vamos a usar la herramienta ``WFUZZ`` para ver si existe un LFI (Local file inclusion):
@@ -110,21 +111,25 @@ wfuzz -> Ejecuta la herramienta Wfuzz, que se usa para pruebas de fuzzing en apl
 ../../../../../../../../../../etc/passwd -> Intenta realizar una travesía de directorios (Directory Traversal o Path Traversal) para acceder al archivo `/etc/passwd`, que contiene información de los usuarios en sistemas Linux.
 </details>
 
-![[Pasted image 20250120121457.png]]
+![Pasted image 20250120121457](https://github.com/user-attachments/assets/405d2ac3-1c34-4489-a14a-c982fdfd8d95)
+
 
 Como vemos en la imagen, nos esta dando muchos resultados, los cuales no son los que queremos obtener, para filtrar este resultado voy a incluir el parámetro ``--hw 115`` que en este caso nos va a excluir todas aquellas respuestas con una cantidad de 115 palabras.
 
-![[Pasted image 20250120122142.png]]
+![Pasted image 20250120122142](https://github.com/user-attachments/assets/18d8df33-ee04-4b2d-ae7b-fec771e43d47)
+
 
 Vemos como nos ha detectado "love" como parámetro a pasar en la URL que hemos usado en la herramienta ``WFUZZ``
 Con dicho parámetro, vamos al navegador y ponemos la URL:
 
-![[Pasted image 20250120122348.png]]
+![Pasted image 20250120122348](https://github.com/user-attachments/assets/0d4280d7-dd90-4320-b76d-480c3a7b12cf)
+
 
 Como vemos la pagina es vulnerable a un LFI.
 Ahora para verlo mejor abrimos el código fuente ``Ctrl + U``
 
-![[Pasted image 20250120122443.png]]
+![Pasted image 20250120122443](https://github.com/user-attachments/assets/546de987-e25e-4b27-924b-f9f63ab24cf1)
+
 
 Como se puede observar, tenemos dos posibles usuario.
 pedro y rosa.
@@ -150,7 +155,8 @@ hydra -> Ejecuta la herramienta Hydra, que es utilizada para ataques de fuerza b
 ssh://172.18.0.2 -> Indica que el ataque será contra el servicio SSH en la IP 172.18.0.2.
 </details>
 
-![[Pasted image 20250120123111.png]]
+![Pasted image 20250120123111](https://github.com/user-attachments/assets/6af7d620-73cb-465a-87ad-76617de7147c)
+
 
 Con el usuario pedro tarda mucho y no, nos esta encontrando nada.
 
@@ -160,7 +166,8 @@ Paso a probar con el usuario rosa empleando el mismo comando de la herramienta `
 hydra -l rosa -P /usr/share/wordlists/rockyou.txt ssh://172.18.0.2
 ```
 
-![[Pasted image 20250120123220.png]]
+![Pasted image 20250120123220](https://github.com/user-attachments/assets/df044a29-8722-4dd2-aff9-29c0d0aed393)
+
 
 Para el usuario rosa nos encuentra la contraseña ``lovebug``, la cual vamos a emplear para realizar una conexión SSH.
 
@@ -168,7 +175,8 @@ Para el usuario rosa nos encuentra la contraseña ``lovebug``, la cual vamos a e
 ssh rosa@172.18.0.2
 ```
 
-![[Pasted image 20250120123356.png]]
+![Pasted image 20250120123356](https://github.com/user-attachments/assets/dae5a678-a1a4-46fa-8a29-d4fdee02ef76)
+
 
 Estamos dentro como el usuario Rosa
 
@@ -176,7 +184,8 @@ Estamos dentro como el usuario Rosa
 ------
 Para empezar usaremos el comando ``sudo -l``, de esta manera sabemos que podemos ejecutar como sudo.
 
-![[Pasted image 20250120123553.png]]
+![Pasted image 20250120123553](https://github.com/user-attachments/assets/e120fca9-9070-4795-9358-6830424c3c47)
+
 
 Vemos que el usuario rosa puede usar los comando ls (listar archivos) y cat (mostrar contenido de archivos) como root.
 
@@ -186,7 +195,8 @@ Sabiendo esto, procedo a listar todos los archivos y directorios del usuario roo
 sudo ls -la /root
 ```
 
-![[Pasted image 20250120124119.png]]
+![Pasted image 20250120124119](https://github.com/user-attachments/assets/7bb289b8-2555-492b-8b56-3c935570f8a3)
+
 
 Obtenemos un archivo secret.txt al cual le pasaremos el comando cat para ver su contenido:
 
@@ -194,28 +204,32 @@ Obtenemos un archivo secret.txt al cual le pasaremos el comando cat para ver su 
 sudo cat /root/secret.txt
 ```
 
-![[Pasted image 20250120124224.png]]
+![Pasted image 20250120124224](https://github.com/user-attachments/assets/b342f51c-eac7-4aae-8914-344733eb6389)
+
 
 Nos muestra un numero hexadecimal, el cual podemos descifrar en la pagina web CyberChef usando el operador ``Magic``:
 
-![[Pasted image 20250120124347.png]]
-![[Pasted image 20250120124358.png]]
+![Pasted image 20250120124347](https://github.com/user-attachments/assets/be56fa43-9a65-48b9-9858-728c0706e110)
+![Pasted image 20250120124358](https://github.com/user-attachments/assets/9885faba-86c1-4d92-bdfd-d53eba2f9754)
 
 Nos muestra como resultado: ``noacertarasosi``
 La cual puede ser una posible contraseña, en este caso para el usuario pedro.
 Pruebo a cambiar de usuario a pedro y introducir dicha contraseña:
 
-![[Pasted image 20250120124538.png]]
+![Pasted image 20250120124538](https://github.com/user-attachments/assets/52d766e6-2aeb-4dd1-98fb-728b9e6c904e)
+
 
 Estamos dentro de pedro.
 Ahora usamos el comando ``sudo -l``para saber que puede ejecutar pedro como root:
 
-![[Pasted image 20250120124646.png]]
+![Pasted image 20250120124646](https://github.com/user-attachments/assets/26fe039e-dff2-4545-95e5-80cd154a3558)
+
 
 Como vemos, pedro tiene permisos para ejecutar /env con permisos de root.
 Visto esto, vamos a buscar en la web CTFOBins una posible escalada de privilegios para /env:
 
-![[Pasted image 20250120124902.png]]
+![Pasted image 20250120124902](https://github.com/user-attachments/assets/aad1dd4a-47bb-40e0-aa66-f2d142738ace)
+
 
 Vamos a la terminal y ejecutamos dicho comando:
 
@@ -223,7 +237,8 @@ Vamos a la terminal y ejecutamos dicho comando:
 sudo env /bin/sh
 ```
 
-![[Pasted image 20250120124943.png]]
+![Pasted image 20250120124943](https://github.com/user-attachments/assets/daa03ddd-f789-4c08-8be2-b11e568337fd)
+
 
 Ya estaríamos dentro del sistema como el usuario ``ROOT``
 
