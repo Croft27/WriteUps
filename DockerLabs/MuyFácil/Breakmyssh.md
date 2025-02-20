@@ -100,7 +100,7 @@ Elegido el módulo veremos sus opciones con `show options` y cargaremos la infor
 
 ![image](https://github.com/user-attachments/assets/a3082feb-fdbc-4a14-a4ae-1bebbbf43734)
 
-En este caso solo tendremos que indicar el RHOST con la ip de la máquina victima ``172.17.0.2`` y el USER_DILE con el diccionarió que queremos utilizar ``/usr/share/wirdlist/metasploit/unix_users.txt``
+En este caso solo tendremos que indicar el RHOST con la ip de la máquina victima ``172.17.0.2`` y el USER_FILE con el diccionarió que queremos utilizar ``/usr/share/wirdlist/metasploit/unix_users.txt``
 
 ![image](https://github.com/user-attachments/assets/a9c64a76-2b55-4c4b-90d0-36643071fd99)
 
