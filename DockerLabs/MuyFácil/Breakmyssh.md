@@ -2,14 +2,14 @@
 
 Una vez desplegada la máquina comprobamos que tenemos conectividad con ``ping -c1 172.17.0.2``
 
-![image](https://github.com/user-attachments/assets/28ace12f-fb05-4a64-9861-e64a60a83609)
+![image](https://github.com/user-attachments/assets/66afed69-1a9a-46ae-b398-4836e6d49a25)
 
 ``-c1``> solo repite el ping 1 sola vez.
 
 Una vez tenemos conectividad con la maquina Víctima, realizo un reconomiento con ``Nmap``
 
 ```bash
-nmap -p- --open -sS -sV -sC -min-rate 5000 -n -Pn 172.17.0.2 -oN Puertos
+nmap -p- --open -sS -sV -sC -min-rate 5000 -n -Pn 172.17.0.2 -oN scan
 ```
 
 <details>
@@ -68,128 +68,77 @@ nmap -p- --open -sS -sV -sC -min-rate 5000 -n -Pn 172.17.0.2 -oN Puertos
 
 ---
 
-### **🔟 `-oN Puertos` → Guarda los resultados en un archivo**
-- `-oN` guarda la salida en un archivo en formato **legible (`Puertos`)** para su posterior análisis.
+### **🔟 `-oN Scan` → Guarda los resultados en un archivo**
+- `-oN` guarda la salida en un archivo en formato **legible (`Scan`)** para su posterior análisis.
 
 ---
 </details>
 
-![image](https://github.com/user-attachments/assets/a263daea-40f8-473a-b321-673d5950cfe1)
+![image](https://github.com/user-attachments/assets/79e7d500-7636-4d7a-beae-c67f3f0c3188)
 
-Para ver los resultados de una forma mas clara realizo el siguiente comando: ``cat Puertos -l ruby``
+Para ver los resultados de una forma mas clara realizo el siguiente comando: ``cat Scan -l python``
 
-![image](https://github.com/user-attachments/assets/d33f6daa-a253-400f-b5fc-6184c4b84204)
+![image](https://github.com/user-attachments/assets/4293f437-f3a0-4b2f-8ebe-f46f95ba29fc)
 
-Como se muestra en el resultado obtenemos los puertos 22 y 80 como puertos abiertos y con sus versiones.
+Como se muestra en el resultado obtenemos El puerto 22 como puerto abierto y con sus versiones.
 
-# Puerto 80 (HTTP)
+Como solo tenemos como resultado el puerto 22 abierto, ejecuto `searchsploit OpenSSH 7.7` para ver si existen vulnerabilidades en esta versión.
 
-Accedemos al servidor web ingresando la dirección IP en el navegador:
+![image](https://github.com/user-attachments/assets/51d251d0-6ce3-48a4-b357-752d866e1fcb)
 
-![image](https://github.com/user-attachments/assets/6b37498f-4d5c-4220-bbf2-14dcbc0b7e3e)
+Como se puede observar en la imagen existen 3 exploit para dicha versión de OpenSSH
 
-Obtenemos una pagina con un Login.
+En mi caso voy a ejecutar la insterfaz de Metasploit `msfconsole` donde buscaremos módulos relacionados con OpenSSH.
 
-Procedo a realizar una Injeccion Sql añadiendo en el USER: ``admin' or 1=1; --``
+![image](https://github.com/user-attachments/assets/26c061be-14e0-4c0a-8aea-60ae7d5b16ad)
 
-![image](https://github.com/user-attachments/assets/ed7d6b55-021a-4c4e-a1c3-c5718cf1e2a1)
+Como se muestra en la imagen tenemo diferentes módulos. En nuestro caso vamos a elegir la opcion 3 que nos permite cargar el módulo para enumerar usuarios por ssh.
 
-<details>
-	<summary><strong>Explicación de SQL Injection:</strong></summary>
+![image](https://github.com/user-attachments/assets/efaabfcf-cd7e-434c-909b-d729773f5bf8)
 
-### **📌 Explicación paso a paso:**
+Elegido el módulo veremos sus opciones con `show options` y cargaremos la información necesaria para poder ejecutar el Exploit.
 
-1️⃣ **`admin'`** → Cierra prematuramente la cadena de texto esperada para el nombre de usuario.
+![image](https://github.com/user-attachments/assets/a3082feb-fdbc-4a14-a4ae-1bebbbf43734)
 
-2️⃣ **`or 1=1`** → Introduce una condición **siempre verdadera**, lo que hace que la autenticación sea exitosa sin importar la contraseña.
+En este caso solo tendremos que indicar el RHOST con la ip de la máquina victima ``172.17.0.2`` y el USER_DILE con el diccionarió que queremos utilizar ``/usr/share/wirdlist/metasploit/unix_users.txt``
 
-3️⃣ **`; --`** →
-   - **`;`** Finaliza la consulta actual.
-   - **`--`** Comenta el resto de la consulta SQL, ignorando cualquier validación de contraseña.
+![image](https://github.com/user-attachments/assets/a9c64a76-2b55-4c4b-90d0-36643071fd99)
 
-### **🔥 Ejemplo en una consulta SQL típica**
+Añadida ya toda la información necesaria dentro del modulo, ejecutamos el exploit con ``run``
 
-Una aplicación podría ejecutar una consulta similar a esta:
+![image](https://github.com/user-attachments/assets/036c4d82-00b3-43e8-a581-bfcbab72917d)
 
-```sql
-SELECT * FROM usuarios WHERE username = 'admin' AND password = 'password';
-```
+Obtenemos el siguiente resultado:
 
-Si el atacante introduce:
+![image](https://github.com/user-attachments/assets/b3757544-bd81-4d7f-9570-290caff740dd)
 
-```sql
-admin' or 1=1; --
-```
+Tenemos diferentes usuario enumerados donde el que mas llama la atención es el usuario ``ROOT``.
+Obtenido dicho usuario, realizamos un ataque de fuerza bruta con ``Hydra``
 
-La consulta final se transforma en:
+## **Ataque de fuerza bruta a SSH con Hydra**
 
-```sql
-SELECT * FROM usuarios WHERE username = 'admin' OR 1=1; -- ' AND password = 'password';
-```
+Probamos credenciales en el puerto **22 (SSH)** con **Hydra**:
 
-Dado que **`1=1` siempre es verdadero**, la consulta devuelve todos los registros, permitiendo al atacante acceder **sin necesidad de conocer la contraseña**.
-</details>
-
-Tenemos un resultado positivo el cual nos devuelve lo siguiente:
-
-![image](https://github.com/user-attachments/assets/8d31134b-d4f1-4d06-bec6-a4b09dd33a93)
-
-Con este usurio y contraseña, realizamos una conexión SSH.
-
-# Puerto 22 (SSH)
+Usamos `Hydra` con el usuario root:
 
 ```bash
-ssh dylan@172.17.0.3
+hydra -l root -P /usr/share/wordlists/rockyou.txt ssh://172.18.0.2
 ```
+![image](https://github.com/user-attachments/assets/44fef571-8286-4bed-b077-dfd366b7f7b6)
 
-![image](https://github.com/user-attachments/assets/90b5e236-9eef-449f-a4bc-1dc081305ea4)
+Obtenemos la contraseña **`estrella`** para el usuario `root`.
 
-# Escalada de privilegios.
-
-Ejecutamos: ``sudo -l``
-
-![image](https://github.com/user-attachments/assets/5a168e24-5763-48bf-98a1-35e4a56e7886)
-
-El usuario Dylan no tiene ningun permiso para usar sudo.
-En vista a que no tiene permisos, buscamos comandos con ``SUID`` habiliutado usando el siguiente comando:
+## **Conexión SSH**
 
 ```bash
-find / -perm -4000 2>/dev/null
+ssh root@172.17.0.2
 ```
-<details>
-	<summary><strong>Explicación del comando: find / -perm -4000 2>/dev/null</strong></summary>
+![image](https://github.com/user-attachments/assets/c86b30a5-ab29-433d-87ec-217bf984a048)
 
-El comando `find / -perm -4000 2>/dev/null` se utiliza para **buscar archivos con el bit SUID activado** en todo el sistema de archivos.
+Si realizamos el comando ``whoami`` vemos que no hace falta realizar una escalada de privilegios ya que hemos iniciado la conexión como Root.
 
-### **📌 Explicación paso a paso:**
+![image](https://github.com/user-attachments/assets/24996776-7930-41e7-9078-61e740b22283)
 
-1️⃣ **`find /`** → Inicia la búsqueda desde la raíz (`/`), es decir, en todo el sistema de archivos.
+:whale: :white_check_mark:
 
-2️⃣ **`-perm -4000`** → Busca archivos con el **bit SUID** activado (`4000`).
-   - El bit **SUID (Set User ID)** permite que un archivo se ejecute con los privilegios de su propietario (generalmente `root`).
-   - Esto significa que si un usuario ejecuta un archivo con SUID, este se ejecutará con los permisos del propietario en lugar de los del usuario.
-
-3️⃣ **`2>/dev/null`** → Redirige los errores (`stderr`, descriptor `2`) a `/dev/null` para evitar mensajes de acceso denegado en directorios protegidos.
-</details>
-
-![image](https://github.com/user-attachments/assets/1cdd9053-3adb-46f7-a7ee-7996202c8feb)
-
-Vemos que tenemos el binario /env con el bit SUID activado.
-Este binario imprime o modifica variables de entorno.
-
-Buscamos en la página web CTFOBins la posible escalada de privilegios con este binario:
-
-![image](https://github.com/user-attachments/assets/d41ae851-e472-4dd7-9b16-940346aa2da8)
-
-En la terminal, nos dirigimos al directorio ``/usr/bin``.
-Dentro de el ejecutamos el siguiente comando que se nos muestra en la anterior imagen:
-
-```bash
-./env /ben/sh -p
-```
-![image](https://github.com/user-attachments/assets/b261fd23-9a1c-45f5-b765-ccf427b00e01)
-
-Realizamos un ``whoami`` y vemos como hemos conseguido escalar privilegios y ser ``ROOT``
-
-![image](https://github.com/user-attachments/assets/5d5a80e4-f1ee-4d06-be3c-01b491c95119)
 
