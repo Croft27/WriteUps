@@ -92,7 +92,7 @@ En mi caso voy a ejecutar la insterfaz de Metasploit `msfconsole` donde buscarem
 
 ![image](https://github.com/user-attachments/assets/26c061be-14e0-4c0a-8aea-60ae7d5b16ad)
 
-Como se muestra en la imagen tenemo diferentes módulos. En nuestro caso vamos a elegir la opcion 3 que nos permite cargar el módulo para enumerar usuarios por ssh.
+Como se muestra en la imagen tenemo diferentes módulos. Vamos a elegir la opcion 3 que nos permite cargar el módulo para enumerar usuarios por ssh.
 
 ![image](https://github.com/user-attachments/assets/efaabfcf-cd7e-434c-909b-d729773f5bf8)
 
