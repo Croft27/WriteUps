@@ -112,14 +112,13 @@ Obtenemos el siguiente resultado:
 
 ![image](https://github.com/user-attachments/assets/b3757544-bd81-4d7f-9570-290caff740dd)
 
-Tenemos diferentes usuario enumerados donde el que mas llama la atención es el usuario ``ROOT``.
-Obtenido dicho usuario, realizamos un ataque de fuerza bruta con ``Hydra``
+Tenemos diferentes usuarios enumerados, donde el que más llama la atención es el usuario ``ROOT``. Una vez obtenido dicho usuario, realizamos un ataque de fuerza bruta con ``Hydra``.
 
 ## **Ataque de fuerza bruta a SSH con Hydra**
 
 Probamos credenciales en el puerto **22 (SSH)** con **Hydra**:
 
-Usamos `Hydra` con el usuario root:
+Usamos `Hydra` con el usuario ``root``:
 
 ```bash
 hydra -l root -P /usr/share/wordlists/rockyou.txt ssh://172.18.0.2
